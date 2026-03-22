@@ -5,8 +5,11 @@ This guide is for moving the OpenClaw Gateway to another computer **without** lo
 ## Current Setup
 
 - Workspace repo: `https://github.com/zyintohoku/openclaw-workspace.git`
+- Current machine OS: **Windows**
+- Target machine OS: **macOS**
 - Workspace path on current machine: `C:\Users\31333\.openclaw\workspace`
 - OpenClaw state dir on current machine: `C:\Users\31333\.openclaw`
+- Typical OpenClaw path on macOS: `~/.openclaw`
 - Active assistant identity: **Sable**
 
 ## Important Rule
@@ -31,6 +34,7 @@ The GitHub repo stores the workspace, including things like:
 - `IDENTITY.md`
 - `HEARTBEAT.md`
 - `MIGRATION.md`
+- `TOMORROW.md`
 - future memory/docs/scripts you choose to commit
 
 This keeps Sable's personality, notes, and repo-managed files consistent across machines.
@@ -46,13 +50,38 @@ GitHub does **not** fully preserve live OpenClaw runtime state such as:
 
 Those live under the OpenClaw state directory:
 
-`C:\Users\31333\.openclaw`
+- Windows: `C:\Users\31333\.openclaw`
+- macOS: `~/.openclaw`
 
 ---
 
-## Recommended Migration Plan (Windows -> Windows)
+## Windows -> macOS Migration Notes
 
-### On the old machine
+This move should work, but it is **not** a perfect byte-for-byte transplant.
+
+Things that should transfer cleanly:
+- workspace repo files
+- notes and docs
+- identity/personality files
+- plain-text memory files
+
+Things that may need adjustment on macOS:
+- service installation / background service wiring
+- machine-specific paths
+- local executable paths
+- any Windows-specific runtime assumptions
+
+Because of that, the right approach is:
+1. use GitHub to restore the workspace cleanly
+2. copy `.openclaw` carefully for continuity
+3. run `openclaw doctor`
+4. test the gateway and Telegram
+
+---
+
+## Recommended Migration Plan (Windows -> macOS)
+
+### On the old Windows machine
 
 1. Go to the workspace repo:
    ```powershell
@@ -78,43 +107,43 @@ Those live under the OpenClaw state directory:
    C:\Users\31333\.openclaw
    ```
 
-   Easiest method: copy that whole folder to an external drive, cloud drive, or the new machine directly.
+   Easiest method: copy that whole folder to an external drive, cloud drive, or directly to the Mac.
 
 ---
 
-### On the new machine
+### On the new macOS machine
 
 1. Install prerequisites if needed:
-   - Node.js
    - Git
+   - Node.js
    - OpenClaw
 
 2. Clone the workspace repo:
-   ```powershell
-   git clone https://github.com/zyintohoku/openclaw-workspace.git C:\Users\<YOUR_USERNAME>\.openclaw\workspace
+   ```bash
+   git clone https://github.com/zyintohoku/openclaw-workspace.git ~/.openclaw/workspace
    ```
 
-3. Copy the old machine's OpenClaw state directory contents as needed into:
+3. Copy the old machine's OpenClaw state into:
    ```text
-   C:\Users\<YOUR_USERNAME>\.openclaw
+   ~/.openclaw
    ```
 
-   The simplest continuity-first approach is to copy the whole `.openclaw` directory from the old machine.
+   The continuity-first approach is to copy the old `.openclaw` directory, but expect some platform-specific cleanup afterward.
 
 4. Run Doctor:
-   ```powershell
-   openclaw.cmd doctor
+   ```bash
+   openclaw doctor
    ```
 
 5. Start the Gateway:
-   ```powershell
-   openclaw.cmd gateway start
+   ```bash
+   openclaw gateway start
    ```
 
 6. Verify status:
-   ```powershell
-   openclaw.cmd status
-   openclaw.cmd gateway status
+   ```bash
+   openclaw status
+   openclaw gateway status
    ```
 
 7. Test Telegram by sending Sable a message.
@@ -123,23 +152,25 @@ Those live under the OpenClaw state directory:
 
 ## Safest Practical Method
 
-If the new machine is meant to take over fully, the safest practical method is:
+If the Mac is meant to take over fully, the safest practical method is:
 
-1. Stop old Gateway
-2. Copy the entire `C:\Users\31333\.openclaw` folder to the new machine's corresponding user directory
-3. Make sure the workspace repo is present and up to date
-4. Run `openclaw.cmd doctor`
-5. Start Gateway on the new machine
+1. Stop old Gateway on Windows
+2. Push the latest workspace repo changes
+3. Copy the entire `C:\Users\31333\.openclaw` folder somewhere accessible
+4. Restore what you need into `~/.openclaw` on the Mac
+5. Run `openclaw doctor`
+6. Start Gateway on the Mac
+7. Test Telegram
 
-This is the best shot at preserving continuity.
+This is the best shot at preserving continuity while still allowing macOS to fix platform-specific details.
 
 ---
 
 ## Day-to-Day Two-Machine Workflow
 
-If switching between two computers over time:
+If switching between Windows and macOS over time:
 
-### Before leaving machine A
+### Before leaving the Windows machine
 ```powershell
 cd C:\Users\31333\.openclaw\workspace
 git status
@@ -149,16 +180,16 @@ git push
 openclaw.cmd gateway stop
 ```
 
-### After arriving at machine B
-```powershell
-cd C:\Users\<YOUR_USERNAME>\.openclaw\workspace
+### After arriving at the Mac
+```bash
+cd ~/.openclaw/workspace
 git pull
-openclaw.cmd doctor
-openclaw.cmd gateway start
-openclaw.cmd status
+openclaw doctor
+openclaw gateway start
+openclaw status
 ```
 
-If continuity is missing, also copy over the latest `.openclaw` state backup.
+If continuity is missing, also restore the latest `.openclaw` state backup.
 
 ---
 
@@ -168,20 +199,21 @@ If continuity is missing, also copy over the latest `.openclaw` state backup.
 - The Git remote is `origin` -> `https://github.com/zyintohoku/openclaw-workspace.git`
 - Telegram sender display name may still appear as `bot1` until changed in BotFather.
 - Workspace identity is set to **Sable**.
+- On macOS, service behavior differs from Windows Scheduled Task behavior, so `openclaw doctor` matters even more.
 
 ---
 
 ## Quick Tomorrow Checklist
 
-On the old machine tonight / before move:
+On the old Windows machine tonight / before move:
 - [ ] `git push`
 - [ ] `openclaw.cmd gateway stop`
 - [ ] copy `C:\Users\31333\.openclaw`
 
-On the new machine tomorrow:
-- [ ] install Node.js / Git / OpenClaw
-- [ ] restore or copy `.openclaw`
-- [ ] verify workspace repo exists
-- [ ] `openclaw.cmd doctor`
-- [ ] `openclaw.cmd gateway start`
+On the new Mac tomorrow:
+- [ ] install Git / Node.js / OpenClaw
+- [ ] clone the workspace repo to `~/.openclaw/workspace`
+- [ ] restore or copy needed `.openclaw` state into `~/.openclaw`
+- [ ] `openclaw doctor`
+- [ ] `openclaw gateway start`
 - [ ] test Telegram
