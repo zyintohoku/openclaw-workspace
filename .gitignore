@@ -1,0 +1,20 @@
+# Local/editor noise
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# OpenClaw internal workspace state
+.openclaw/
+
+# Common secret files
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Optional local memory/index caches if ever created here
+*.sqlite
+*.db
